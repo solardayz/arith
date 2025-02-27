@@ -164,10 +164,8 @@ class _ArithmeticGameScreenState extends State<ArithmeticGameScreen> {
   void initState() {
     super.initState();
     _generateProblem();
-    // 키보드가 올라올 때 자동으로 스크롤
     _answerFocusNode.addListener(() {
       if (_answerFocusNode.hasFocus) {
-        // 잠시 대기 후 스크롤 애니메이션
         Future.delayed(Duration(milliseconds: 300), () {
           if (_scrollController.hasClients) {
             _scrollController.animateTo(
@@ -257,8 +255,8 @@ class _ArithmeticGameScreenState extends State<ArithmeticGameScreen> {
       });
     }
 
-    // 1초 후에 새 문제 생성 및 메시지 초기화
-    Timer(Duration(seconds: 1), () {
+    // 2초 후에 새 문제 생성 및 메시지 초기화 (메시지가 오래 보이도록 2초로 설정)
+    Timer(Duration(seconds: 2), () {
       setState(() {
         _generateProblem();
         resultMessage = '';
@@ -336,7 +334,14 @@ class _ArithmeticGameScreenState extends State<ArithmeticGameScreen> {
                   fillColor: Colors.white,
                 ),
               ),
-              SizedBox(height: 20),
+              Text(
+                resultMessage,
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: resultColor,
+                ),
+              ),
               ElevatedButton(
                 onPressed: _checkAnswer,
                 style: ElevatedButton.styleFrom(
@@ -347,14 +352,6 @@ class _ArithmeticGameScreenState extends State<ArithmeticGameScreen> {
                 child: Text('입력'),
               ),
               SizedBox(height: 20),
-              Text(
-                resultMessage,
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: resultColor,
-                ),
-              ),
             ],
           ),
         ),
