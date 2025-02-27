@@ -138,7 +138,6 @@ class _NameInputScreenState extends State<NameInputScreen> {
   }
 }
 
-// _ArithmeticGameScreenState에 TickerProviderStateMixin을 추가하여 애니메이션 컨트롤러를 사용할 수 있습니다.
 class ArithmeticGameScreen extends StatefulWidget {
   final String name;
   const ArithmeticGameScreen({Key? key, required this.name}) : super(key: key);
@@ -154,6 +153,7 @@ class _ArithmeticGameScreenState extends State<ArithmeticGameScreen>
   final FocusNode _answerFocusNode = FocusNode();
 
   int score = 0;
+  int questionNumber = 1;
   late int operand1;
   late int operand2;
   late String operator;
@@ -227,7 +227,6 @@ class _ArithmeticGameScreenState extends State<ArithmeticGameScreen>
         setState(() {
           _timeLeft--;
         });
-        // 5초 미만이면 애니메이션 시작, 그렇지 않으면 중지
         if (_timeLeft < 5 && !_animationController.isAnimating) {
           _animationController.repeat(reverse: true);
         } else if (_timeLeft >= 5 && _animationController.isAnimating) {
@@ -244,7 +243,7 @@ class _ArithmeticGameScreenState extends State<ArithmeticGameScreen>
     _countdownTimer?.cancel();
   }
 
-  // 타임아웃 시 오답 처리
+  // 타임아웃 시 오답 처리 후 문제 번호 증가
   void _handleTimeOut() {
     setState(() {
       score--;
@@ -252,6 +251,7 @@ class _ArithmeticGameScreenState extends State<ArithmeticGameScreen>
     });
     Timer(Duration(seconds: 2), () {
       setState(() {
+        questionNumber++;
         _generateProblem();
         resultMessage = '';
         _startCountdown();
@@ -259,7 +259,7 @@ class _ArithmeticGameScreenState extends State<ArithmeticGameScreen>
     });
   }
 
-  // 문제 생성: 사칙연산 중 무작위 선택, 최대 2자리 수
+  // 문제 생성 (문제 번호는 _checkAnswer 및 _handleTimeOut에서 증가)
   void _generateProblem() {
     int opType = _random.nextInt(4); // 0: +, 1: -, 2: *, 3: /
     switch (opType) {
@@ -297,7 +297,7 @@ class _ArithmeticGameScreenState extends State<ArithmeticGameScreen>
     _answerController.clear();
   }
 
-  // 답안 체크: 정답이면 +1, 틀리면 -1 (답 입력 시 타이머 취소)
+  // 답안 체크: 정답이면 +1, 틀리면 -1 (답 입력 시 타이머 취소 후 문제 번호 증가)
   void _checkAnswer() {
     _cancelCountdown();
     String answerText = _answerController.text.trim();
@@ -330,9 +330,9 @@ class _ArithmeticGameScreenState extends State<ArithmeticGameScreen>
       });
     }
 
-    // 2초 후에 새 문제 생성 및 메시지 초기화
     Timer(Duration(seconds: 2), () {
       setState(() {
+        questionNumber++;
         _generateProblem();
         resultMessage = '';
         _startCountdown();
@@ -348,7 +348,7 @@ class _ArithmeticGameScreenState extends State<ArithmeticGameScreen>
         ? Colors.red
         : Colors.black;
 
-    // 남은 시간을 표시하는 위젯 (5초 미만일 때는 애니메이션 적용)
+    // 남은 시간이 5초 미만일 때 애니메이션 효과 적용
     Widget countdownWidget;
     if (_timeLeft < 5) {
       countdownWidget = AnimatedBuilder(
@@ -404,7 +404,7 @@ class _ArithmeticGameScreenState extends State<ArithmeticGameScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // 상단: 앱 아이콘, 점수, 애니메이션 적용된 남은 시간
+                    // 상단: 앱 아이콘, 점수 및 문제 번호, 남은 시간
                     SvgPicture.asset(
                       'assets/app_icon.svg',
                       width: 100,
@@ -412,7 +412,7 @@ class _ArithmeticGameScreenState extends State<ArithmeticGameScreen>
                     ),
                     SizedBox(height: 20),
                     Text(
-                      '안녕, ${widget.name}님! 점수: $score',
+                      '점수: $score   문제: $questionNumber 번',
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
