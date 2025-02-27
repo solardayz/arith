@@ -1,0 +1,11 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- 배경: 오렌지색, 둥근 모서리 -->
+  <rect width="512" height="512" rx="80" fill="#FFA500"/>
+  <!-- 사칙연산 기호를 2×2로 배치 -->
+  <g fill="#FFFFFF" font-family="Arial, sans-serif" font-weight="bold" text-anchor="middle">
+    <text x="150" y="230" font-size="100">+</text>
+    <text x="362" y="230" font-size="100">−</text>
+    <text x="150" y="370" font-size="100">×</text>
+    <text x="362" y="370" font-size="100">÷</text>
+  </g>
+</svg>

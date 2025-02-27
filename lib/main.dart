@@ -52,6 +52,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 }
 
+// 이름 입력 및 게임 시작 화면
 class NameInputScreen extends StatefulWidget {
   @override
   _NameInputScreenState createState() => _NameInputScreenState();
@@ -147,6 +148,9 @@ class ArithmeticGameScreen extends StatefulWidget {
 
 class _ArithmeticGameScreenState extends State<ArithmeticGameScreen> {
   final TextEditingController _answerController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  final FocusNode _answerFocusNode = FocusNode();
+
   int score = 0;
   late int operand1;
   late int operand2;
@@ -160,19 +164,42 @@ class _ArithmeticGameScreenState extends State<ArithmeticGameScreen> {
   void initState() {
     super.initState();
     _generateProblem();
+    // 키보드가 올라올 때 자동으로 스크롤
+    _answerFocusNode.addListener(() {
+      if (_answerFocusNode.hasFocus) {
+        // 잠시 대기 후 스크롤 애니메이션
+        Future.delayed(Duration(milliseconds: 300), () {
+          if (_scrollController.hasClients) {
+            _scrollController.animateTo(
+              _scrollController.position.maxScrollExtent,
+              duration: Duration(milliseconds: 300),
+              curve: Curves.easeOut,
+            );
+          }
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _answerController.dispose();
+    _scrollController.dispose();
+    _answerFocusNode.dispose();
+    super.dispose();
   }
 
   // 문제 생성: 사칙연산 중 무작위 선택, 최대 2자리 수
   void _generateProblem() {
     int opType = _random.nextInt(4); // 0: +, 1: -, 2: *, 3: /
     switch (opType) {
-      case 0: // 덧셈
+      case 0:
         operand1 = _random.nextInt(100);
         operand2 = _random.nextInt(100);
         operator = '+';
         correctAnswer = operand1 + operand2;
         break;
-      case 1: // 뺄셈 (음수 방지)
+      case 1:
         operand1 = _random.nextInt(100);
         operand2 = _random.nextInt(100);
         if (operand1 < operand2) {
@@ -183,15 +210,15 @@ class _ArithmeticGameScreenState extends State<ArithmeticGameScreen> {
         operator = '-';
         correctAnswer = operand1 - operand2;
         break;
-      case 2: // 곱셈
+      case 2:
         operand1 = _random.nextInt(100);
         operand2 = _random.nextInt(100);
         operator = '×';
         correctAnswer = operand1 * operand2;
         break;
-      case 3: // 나눗셈: 1~9 범위의 divisor와 quotient (정수 몫)
-        operand2 = _random.nextInt(9) + 1; // 1~9
-        int quotient = _random.nextInt(10); // 0~9
+      case 3:
+        operand2 = _random.nextInt(9) + 1;
+        int quotient = _random.nextInt(10);
         operand1 = operand2 * quotient;
         operator = '÷';
         correctAnswer = quotient;
@@ -241,7 +268,6 @@ class _ArithmeticGameScreenState extends State<ArithmeticGameScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // 결과 메시지 색상: 정답은 녹색, 오답은 빨간색
     final Color resultColor = resultMessage.contains('정답')
         ? Colors.green
         : resultMessage.contains('오답')
@@ -256,71 +282,81 @@ class _ArithmeticGameScreenState extends State<ArithmeticGameScreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Text(
-              '안녕, ${widget.name}님! 점수: $score',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.blueAccent,
+        child: SingleChildScrollView(
+          controller: _scrollController,
+          child: Column(
+            children: [
+              // 메인 화면 상단에 앱 아이콘 표시
+              SvgPicture.asset(
+                'assets/app_icon.svg',
+                width: 100,
+                height: 100,
               ),
-            ),
-            SizedBox(height: 30),
-            // 문제를 감싸는 카드 형태의 컨테이너
-            Container(
-              padding: EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.shade400,
-                    blurRadius: 8,
-                    offset: Offset(2, 2),
-                  ),
-                ],
-              ),
-              child: Text(
-                '$operand1 $operator $operand2 = ?',
+              SizedBox(height: 20),
+              Text(
+                '안녕, ${widget.name}님! 점수: $score',
                 style: TextStyle(
-                  fontSize: 32,
+                  fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: Colors.blueAccent,
                 ),
               ),
-            ),
-            SizedBox(height: 30),
-            TextField(
-              controller: _answerController,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: '답을 입력하세요',
-                border: OutlineInputBorder(),
-                filled: true,
-                fillColor: Colors.white,
+              SizedBox(height: 30),
+              Container(
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.shade400,
+                      blurRadius: 8,
+                      offset: Offset(2, 2),
+                    ),
+                  ],
+                ),
+                child: Text(
+                  '$operand1 $operator $operand2 = ?',
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
               ),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _checkAnswer,
-              style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                backgroundColor: Colors.orange,
-                textStyle: TextStyle(fontSize: 20),
+              SizedBox(height: 30),
+              TextField(
+                focusNode: _answerFocusNode,
+                controller: _answerController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: '답을 입력하세요',
+                  border: OutlineInputBorder(),
+                  filled: true,
+                  fillColor: Colors.white,
+                ),
               ),
-              child: Text('입력'),
-            ),
-            SizedBox(height: 20),
-            Text(
-              resultMessage,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: resultColor,
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _checkAnswer,
+                style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                  backgroundColor: Colors.orange,
+                  textStyle: TextStyle(fontSize: 20),
+                ),
+                child: Text('입력'),
               ),
-            ),
-          ],
+              SizedBox(height: 20),
+              Text(
+                resultMessage,
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: resultColor,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
