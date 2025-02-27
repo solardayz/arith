@@ -43,7 +43,7 @@ class _SplashScreenState extends State<SplashScreen> {
       backgroundColor: Colors.orange,
       body: Center(
         child: SvgPicture.asset(
-          'assets/app_icon.svg',
+          'assets/images/app_icon.svg',
           width: 150,
           height: 150,
         ),
@@ -406,7 +406,7 @@ class _ArithmeticGameScreenState extends State<ArithmeticGameScreen>
                   children: [
                     // 상단: 앱 아이콘, 점수 및 문제 번호, 남은 시간
                     SvgPicture.asset(
-                      'assets/app_icon.svg',
+                      'assets/images/app_icon.svg',
                       width: 100,
                       height: 100,
                     ),
