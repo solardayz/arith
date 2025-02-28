@@ -281,8 +281,8 @@ class _ArithmeticGameScreenState extends State<ArithmeticGameScreen>
         correctAnswer = operand1 - operand2;
         break;
       case 2:
-        operand1 = _random.nextInt(100);
-        operand2 = _random.nextInt(100);
+        operand1 = _random.nextInt(10);
+        operand2 = _random.nextInt(10);
         operator = '×';
         correctAnswer = operand1 * operand2;
         break;
